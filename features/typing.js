@@ -8,7 +8,7 @@ module.exports = function (controller) {
 
     let typing = new BotkitConversation('typing', controller);
 
-    typing.say('I am going to type for a while now...');
+    typing.say('Hi, welcome to the Matrix!');
     typing.addAction('typing');
 
     // start the typing indicator
@@ -16,7 +16,14 @@ module.exports = function (controller) {
     // trigger a gotoThread, which gives us an opportunity to delay the next message
     typing.addAction('next_thread', 'typing');
 
-    typing.addMessage('typed!', 'next_thread');
+    typing.addMessage('What is your name?', 'next_thread');
+    typing.addAction('typing');
+
+    // start the typing indicator
+    typing.addMessage({ type: 'typing' }, 'next_thread');
+    // trigger a gotoThread, which gives us an opportunity to delay the next message
+    typing.addAction('next_thread2', 'next_thread');
+    typing.addMessage('What is your age?', 'next_thread2');
 
     // use the before handler to delay the next message 
     typing.before('next_thread', async () => {
@@ -25,10 +32,16 @@ module.exports = function (controller) {
             setTimeout(resolve, 3000);
         });
     });
+    typing.before('next_thread2', async () => {
+        return new Promise((resolve) => {
+            // simulate some long running process
+            setTimeout(resolve, 3000);
+        });
+    });
 
     controller.addDialog(typing);
 
-    controller.hears('typing dialog', 'message', async (bot, message) => {
+    controller.hears('hello', 'message', async (bot, message) => {
         await bot.beginDialog('typing');
     });
 
@@ -41,4 +54,6 @@ module.exports = function (controller) {
             await bot.reply(message, 'Typed!');
         }, 1000);
     });
+
+
 };
